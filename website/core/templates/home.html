@@ -1,15 +1,12 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mukilan's Blog</title>
-</head>
-<body>
-    <main>
-        <div class="container">
-           <h1>Hello World!</h1>
-        </div>
-    </main>
-</body>
-</html>
+{% extends 'base.html' %}
+{% block content %}
+    <blockquote>"Adopt the pace of nature: her secret is patience." — Ralph Waldo Emerson</blockquote>
+    <h2>Food For Thought</h2>
+    <div class="posts-list">
+    <ul>
+    {% for post in posts %}
+        <li><a href="/{{ post.slug }}">{{post.title}}</a></li>
+    {% endfor %}
+    </ul>
+    </div>
+{% endblock content %}
