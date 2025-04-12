@@ -1,0 +1,45 @@
+version: '3.8'
+
+services:
+  db:
+    image: postgres:16.1-alpine
+    environment:
+      - POSTGRES_HOST_AUTH_METHOD=trust
+    ports:
+      - 25432:5432
+    volumes:
+      - ./docker/postgres:/docker-entrypoint-initdb.d/init-user-db.sh:delegated
+      - pg_data:/var/lib/postgresql/data
+  
+  website:
+    depends_on:
+      - db
+    build:
+      context: .
+      dockerfile: ./Dockerfile
+    volumes:
+      - static_volume:/website/static
+      - website_media_data:/website/media
+      - ./core:/website/core
+      - ./mkdwn2html:/website/mkdwn2html
+      - /website/.venv
+    env_file: ./.env
+    working_dir: /website
+    command: uv run python manage.py runserver 0.0.0.0:8000
+    ports:
+      - '8000:8000'
+  
+  nginx:
+    build: ./docker/dev/nginx
+    volumes:
+      - static_volume:/website/static
+      - website_media_data:/website/media
+    ports:
+      - '80:80'
+    depends_on:
+      - website
+
+volumes:
+  pg_data:
+  static_volume:
+  website_media_data:

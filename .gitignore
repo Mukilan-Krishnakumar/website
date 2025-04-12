@@ -99,3 +99,5 @@ db.sqlite3
 
 
 website/static/
+
+init-user-db.sh
