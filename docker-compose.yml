@@ -34,12 +34,26 @@ services:
     volumes:
       - static_volume:/website/static
       - website_media_data:/website/media
+      - certbot_conf:/etc/letsencrypt
+      - certbot_www:/var/www/certbot
     ports:
       - '80:80'
+      - '443:443'
     depends_on:
       - website
+    restart: always
+    command: "/bin/sh -c 'while :; do sleep 6h & wait $${!}; nginx -s reload; done & nginx -g \"daemon off;\"'"
+
+  certbot:
+    image: certbot/certbot:latest
+    volumes:
+      - certbot_conf:/etc/letsencrypt
+      - certbot_www:/var/www/certbot
+    entrypoint: "/bin/sh -c 'trap exit TERM; while :; do certbot renew; sleep 12h & wait $${!}; done;'"
 
 volumes:
   pg_data:
   static_volume:
   website_media_data:
+  certbot_conf:
+  certbot_www:
