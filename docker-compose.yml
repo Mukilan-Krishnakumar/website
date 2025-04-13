@@ -30,26 +30,34 @@ services:
       - '8000:8000'
   
   nginx:
-    build: ./docker/dev/nginx
+    build: 
+      context: ./docker/dev/nginx
+      dockerfile: Dockerfile
     volumes:
       - static_volume:/website/static
       - website_media_data:/website/media
       - certbot_conf:/etc/letsencrypt
       - certbot_www:/var/www/certbot
+      - ./docker/dev/nginx/entrypoint.sh:/entrypoint.sh
     ports:
       - '80:80'
       - '443:443'
     depends_on:
       - website
     restart: always
-    command: "/bin/sh -c 'while :; do sleep 6h & wait $${!}; nginx -s reload; done & nginx -g \"daemon off;\"'"
+    entrypoint: /entrypoint.sh
 
   certbot:
     image: certbot/certbot:latest
     volumes:
       - certbot_conf:/etc/letsencrypt
       - certbot_www:/var/www/certbot
-    entrypoint: "/bin/sh -c 'trap exit TERM; while :; do certbot renew; sleep 12h & wait $${!}; done;'"
+    depends_on:
+      - nginx
+    command: >
+      certonly --webroot --webroot-path=/var/www/certbot
+      --email mukilankrishnakumar2002@gmail.com --agree-tos --no-eff-email
+      --force-renewal -d mukilank.com
 
 volumes:
   pg_data:
